@@ -1,0 +1,113 @@
+<html>
+<head>
+<title>DeviceList.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,128,0); font-weight: bold; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+DeviceList.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">package </span><span class="s1">com.mon_per.my_first_bluetooth_app; 
+ 
+</span><span class="s0">import </span><span class="s1">android.support.v7.app.AppCompatActivity; 
+</span><span class="s0">import </span><span class="s1">android.os.Bundle; 
+</span><span class="s0">import </span><span class="s1">android.view.View; 
+</span><span class="s0">import </span><span class="s1">android.widget.Button; 
+</span><span class="s0">import </span><span class="s1">android.widget.ListView; 
+</span><span class="s0">import </span><span class="s1">java.util.Set; 
+</span><span class="s0">import </span><span class="s1">java.util.ArrayList; 
+</span><span class="s0">import </span><span class="s1">android.widget.Toast; 
+</span><span class="s0">import </span><span class="s1">android.widget.ArrayAdapter; 
+</span><span class="s0">import </span><span class="s1">android.widget.AdapterView; 
+</span><span class="s0">import </span><span class="s1">android.widget.AdapterView.OnItemClickListener; 
+</span><span class="s0">import </span><span class="s1">android.widget.TextView; 
+</span><span class="s0">import </span><span class="s1">android.content.Intent; 
+</span><span class="s0">import </span><span class="s1">android.bluetooth.BluetoothAdapter; 
+</span><span class="s0">import </span><span class="s1">android.bluetooth.BluetoothDevice; 
+ 
+ 
+</span><span class="s0">public class </span><span class="s1">DeviceList </span><span class="s0">extends </span><span class="s1">AppCompatActivity { 
+ 
+    </span><span class="s0">private </span><span class="s1">Button buttonPaired; 
+    </span><span class="s0">private </span><span class="s1">ListView deviceList; 
+    </span><span class="s0">private </span><span class="s1">BluetoothAdapter myBluetooth = </span><span class="s0">null</span><span class="s1">; 
+    </span><span class="s0">private </span><span class="s1">Set&lt;BluetoothDevice&gt; pairedDevices; 
+    </span><span class="s0">public static </span><span class="s1">String EXTRA_ADDRESS = </span><span class="s2">&quot;device_address&quot;</span><span class="s1">; 
+ 
+    </span><span class="s0">private </span><span class="s1">AdapterView.OnItemClickListener myListClickListener = </span><span class="s0">new </span><span class="s1">AdapterView.OnItemClickListener(){ 
+ 
+        </span><span class="s0">public void </span><span class="s1">onItemClick (AdapterView av, View v, </span><span class="s0">int </span><span class="s1">arg2, </span><span class="s0">long </span><span class="s1">arg3){ 
+            </span><span class="s3">//Get the device MAC Address, the last 17 chars in the view</span><span class="s1"> 
+            String info = ((TextView) v).getText().toString(); 
+            String address = info.substring(info.length() - </span><span class="s4">17</span><span class="s1">); 
+            </span><span class="s3">//Make intent to start activity</span><span class="s1"> 
+            Intent i = </span><span class="s0">new </span><span class="s1">Intent(DeviceList.</span><span class="s0">this</span><span class="s1">, ledControl.</span><span class="s0">class</span><span class="s1">); 
+            </span><span class="s3">//Change Activity</span><span class="s1"> 
+            i.putExtra(EXTRA_ADDRESS, address); </span><span class="s3">//this will be received at ledControl class activity</span><span class="s1"> 
+            startActivity(i); 
+        } 
+    }; 
+ 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) { 
+        </span><span class="s0">super</span><span class="s1">.onCreate(savedInstanceState); 
+        setContentView(R.layout.activity_device_list); 
+        buttonPaired = (Button) findViewById(R.id.button_1); 
+        deviceList = (ListView) findViewById(R.id.list_1); 
+        myBluetooth = BluetoothAdapter.getDefaultAdapter(); 
+        </span><span class="s0">if</span><span class="s1">(myBluetooth == </span><span class="s0">null</span><span class="s1">){ 
+            </span><span class="s3">//Show error message showing that you do not have a bluetooth adapter available</span><span class="s1"> 
+            Toast.makeText(getApplicationContext(), </span><span class="s2">&quot;Bluetooth Device not available&quot;</span><span class="s1">, Toast.LENGTH_LONG).show(); 
+            </span><span class="s3">//Finish app</span><span class="s1"> 
+            finish(); 
+        }</span><span class="s0">else</span><span class="s1">{ 
+            </span><span class="s0">if</span><span class="s1">(myBluetooth.isEnabled()){ 
+ 
+            }</span><span class="s0">else</span><span class="s1">{ 
+                </span><span class="s3">//ask the user to turn on bluetooth</span><span class="s1"> 
+                Intent turnBTon = </span><span class="s0">new </span><span class="s1">Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE); 
+                startActivityForResult(turnBTon,</span><span class="s4">1</span><span class="s1">); 
+            } 
+        } 
+        </span><span class="s3">//Create a listener for the bluetooth device</span><span class="s1"> 
+        buttonPaired.setOnClickListener(</span><span class="s0">new </span><span class="s1">View.OnClickListener(){ 
+            @Override 
+            </span><span class="s0">public void </span><span class="s1">onClick(View v){ 
+                pairedDeviceList(); 
+            } 
+        }); 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">pairedDeviceList(){ 
+        pairedDevices = myBluetooth.getBondedDevices(); 
+        ArrayList list = </span><span class="s0">new </span><span class="s1">ArrayList(); 
+ 
+        </span><span class="s0">if</span><span class="s1">(pairedDevices.size() &gt; </span><span class="s4">0 </span><span class="s1">) { 
+            </span><span class="s0">for </span><span class="s1">(BluetoothDevice bt : pairedDevices) { 
+                list.add(bt.getName() + </span><span class="s2">&quot;</span><span class="s0">\n</span><span class="s2">&quot; </span><span class="s1">+ bt.getAddress()); 
+            } 
+        }</span><span class="s0">else</span><span class="s1">{ 
+            Toast.makeText(getApplicationContext(), </span><span class="s2">&quot;No paired bluetooth device found&quot;</span><span class="s1">, Toast.LENGTH_LONG).show(); 
+        } 
+ 
+        </span><span class="s0">final </span><span class="s1">ArrayAdapter adapter = </span><span class="s0">new </span><span class="s1">ArrayAdapter(</span><span class="s0">this</span><span class="s1">, android.R.layout.simple_list_item_1, list); 
+        deviceList.setAdapter(adapter); 
+        deviceList.setOnItemClickListener(myListClickListener); 
+    } 
+ 
+} 
+</span></pre>
+</body>
+</html>
